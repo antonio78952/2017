@@ -13,7 +13,7 @@ public partial class filtrado_ventas : System.Web.UI.Page
 {
     Funciones consulta = new Funciones();
     medina enchufe = new medina();
-    public int j,i,n_ventas, n_requisiciones, n_productos_lista_requisicion, contador_ventas, n_ordenes_compra, n_listas_orden,n_pedidos,n_lista_pedidos;
+    public int  n_lista_calcular,j,i,n_ventas, n_requisiciones, n_productos_lista_requisicion, contador_ventas, n_ordenes_compra, n_listas_orden,n_pedidos,n_lista_pedidos;
     public int[] cantidad_lista_requisicion, cantidad_lista_venta, cantidad_backorder_lista_venta, cantidad_trasferencia,id_sucursal_requiere,id_sucursal_trasfer,
                  cantidad_surtida_pedido, cantidad_backorder_lista_pedido, cantidad_lista_pedido,
                  numero_factura,
@@ -334,52 +334,74 @@ public partial class filtrado_ventas : System.Web.UI.Page
         }
     }
 
+    public void generar_n_ventas_estadisticas()
+    {
+        try
+        {
+            Conexion objeto = new Conexion();
+            string[] registro;
+            n_lista_pedidos = 0;
+            objeto.abrir_conexion_mysql();
+            objeto.cadena_comando_mysql = "select count(*)  from ventas inner join lista_productos_venta on lista_productos_venta.clave_venta = ventas.clave_venta inner join sucursales on ventas.id_sucursal = sucursales.id_sucursal inner join inventario on inventario.codigo_proveedor = lista_productos_venta.codigo inner join sucursales_sistema on ventas.id_sucursal_sistema = sucursales_sistema.id_sucursal_sistema where (Date_format(ventas.fecha,'%Y-%m-%d')  BETWEEN '2016-01-01'  and  '2016-11-01')";
+            objeto.aplicar_comando_mysql_extraccion();
+            while (objeto.leer_comando.Read())
+            {
+                registro = new string[1];
+                registro[0] = objeto.leer_comando.GetString(0);
+                n_lista_calcular = Convert.ToInt32(registro[0]);
+            }
+            objeto.cerrar_conexion_mysql_extraccion();
+            fecha_venta = new DateTime[n_lista_calcular];
+            clave_venta = new string[n_lista_calcular];
+            clientes = new string[n_lista_calcular];
+            codigo_proveedor_lista_venta = new string[n_lista_calcular];
+            cantidad_lista_venta = new Int32[n_lista_calcular];
+            producto_lista_orden = new string[n_lista_calcular];
+            precio_lista_venta = new double[n_lista_calcular];
+            sucursal = new string[n_lista_calcular];
+            proveedor_lista_venta = new string [n_lista_calcular];
+
+            Array.Clear(fecha_venta, 0 , fecha_venta.Length);
+            Array.Clear(clave_venta, 0, clave_venta.Length);
+            Array.Clear(clientes, 0, clientes.Length);
+            Array.Clear(codigo_proveedor_lista_venta, 0, codigo_proveedor_lista_venta.Length);
+            Array.Clear(cantidad_lista_venta, 0, cantidad_lista_venta.Length);
+            Array.Clear(producto_lista_orden, 0, producto_lista_orden.Length);
+            Array.Clear(precio_lista_venta, 0, precio_lista_venta.Length);
+            Array.Clear(sucursal, 0, sucursal.Length);
+            Array.Clear(proveedor_lista_venta, 0, proveedor_lista_venta.Length);
+
+        }
+        catch { }
+    }
+
     public void extraer_ventas()
     {
         try
         {
             Conexion objeto = new Conexion();
             objeto.abrir_conexion_mysql();
-            string[] registro;
-            objeto.cadena_comando_mysql = "select sucursales.nombre as cliente,ventas.clave_cotizacion as clave_cotizacion,ventas.clave_pedido as clave_pedido,ventas.clave_venta,ventas.iva,ventas.subtotal,ventas.total,vendedores.nombre as Nombre_vendedor,sucursales_sistema.nombre as Sucursal,ventas.comision_total_vendedor,ventas.comision_total_negocio,ventas.estado as Estado_venta,cotizaciones.fecha as fecha_cotizacion,pedidos.fecha as fecha_pedido,ventas.fecha as fecha_venta from ventas inner join cotizaciones on cotizaciones.clave_cotizacion = ventas.clave_cotizacion  inner join pedidos on pedidos.clave_pedido = ventas.clave_pedido inner join sucursales on sucursales.id_sucursal = ventas.id_sucursal inner join sucursales_sistema on sucursales_sistema.id_sucursal_sistema = ventas.id_sucursal_sistema inner join vendedores on vendedores.id_vendedor = ventas.id_vendedor order by fecha_venta desc limit 100";
+            objeto.cadena_comando_mysql = "select sucursales.nombre as cliente,ventas.clave_cotizacion as clave_cotizacion,ventas.clave_pedido as clave_pedido,ventas.clave_venta,ventas.iva,ventas.subtotal,ventas.total,vendedores.nombre as Nombre_vendedor,sucursales_sistema.nombre as Sucursal,ventas.comision_total_vendedor,ventas.comision_total_negocio,ventas.estado as Estado_venta,cotizaciones.fecha as fecha_cotizacion,pedidos.fecha as fecha_pedido,ventas.fecha as fecha_venta from ventas inner join cotizaciones on cotizaciones.clave_cotizacion = ventas.clave_cotizacion  inner join pedidos on pedidos.clave_pedido = ventas.clave_pedido inner join sucursales on sucursales.id_sucursal = ventas.id_sucursal inner join sucursales_sistema on sucursales_sistema.id_sucursal_sistema = ventas.id_sucursal_sistema inner join vendedores on vendedores.id_vendedor = ventas.id_vendedor order by fecha_venta desc ";
             objeto.aplicar_comando_mysql_extraccion();
             contador_ventas = 0;
             while (objeto.leer_comando.Read())
             {
-                registro = new string[15];
-                registro[0] = objeto.leer_comando.GetString(0);
-                registro[1] = objeto.leer_comando.GetString(1);
-                registro[2] = objeto.leer_comando.GetString(2);
-                registro[3] = objeto.leer_comando.GetString(3);
-                registro[4] = objeto.leer_comando.GetString(4);
-                registro[5] = objeto.leer_comando.GetString(5);
-                registro[6] = objeto.leer_comando.GetString(6);
-                registro[7] = objeto.leer_comando.GetString(7);
-                registro[8] = objeto.leer_comando.GetString(8);
-                registro[9] = objeto.leer_comando.GetString(9);
-                registro[10] = objeto.leer_comando.GetString(10);
-                registro[11] = objeto.leer_comando.GetString(11);
-                registro[12] = objeto.leer_comando.GetString(12);
-                registro[13] = objeto.leer_comando.GetString(13);
-                registro[14] = objeto.leer_comando.GetString(14);
-
-               
-                clientes[contador_ventas] = registro[0];
-                clave_cotizacion[contador_ventas] = registro[1];
-                clave_pedido[contador_ventas] = registro[2];
-                clave_venta[contador_ventas] = registro[3];
-                iva[contador_ventas] = Convert.ToDouble(registro[4]);
-                subtotal[contador_ventas] = Convert.ToDouble(registro[5]);
-                total[contador_ventas] = Convert.ToDouble(registro[6]);
-                nombre_vendedor[contador_ventas] = registro[7];
-                sucursal[contador_ventas] = registro[8];
-                comision_vendedor[contador_ventas] = Convert.ToDouble(registro[9]);
-                comision_negocio[contador_ventas] = Convert.ToDouble(registro[10]);
-                estado_venta[contador_ventas] = registro[11];
-                fecha_cotizacion[contador_ventas] = Convert.ToDateTime(registro[12]);
-                fecha_pedido[contador_ventas] = Convert.ToDateTime(registro[13]);
-                fecha_venta[contador_ventas] = Convert.ToDateTime(registro[14]);
-
+                j = 0;
+                clientes[contador_ventas] = objeto.leer_comando.GetString(j++);
+                clave_cotizacion[contador_ventas] = objeto.leer_comando.GetString(j++);
+                clave_pedido[contador_ventas] = objeto.leer_comando.GetString(j++);
+                clave_venta[contador_ventas] = objeto.leer_comando.GetString(j++);
+                iva[contador_ventas] = objeto.leer_comando.GetDouble(j++);
+                subtotal[contador_ventas] = objeto.leer_comando.GetDouble(j++);
+                total[contador_ventas] = objeto.leer_comando.GetDouble(j++);
+                nombre_vendedor[contador_ventas] = objeto.leer_comando.GetString(j++);
+                sucursal[contador_ventas] = objeto.leer_comando.GetString(j++);
+                comision_vendedor[contador_ventas] = objeto.leer_comando.GetDouble(j++);
+                comision_negocio[contador_ventas] = objeto.leer_comando.GetDouble(j++);
+                estado_venta[contador_ventas] = objeto.leer_comando.GetString(j++);
+                fecha_cotizacion[contador_ventas] = objeto.leer_comando.GetDateTime(j++);
+                fecha_pedido[contador_ventas] = objeto.leer_comando.GetDateTime(j++);
+                fecha_venta[contador_ventas] = objeto.leer_comando.GetDateTime(j++);
                 contador_ventas++;
             }
             objeto.cerrar_conexion_mysql_extraccion();
@@ -387,6 +409,39 @@ public partial class filtrado_ventas : System.Web.UI.Page
         catch (System.Exception ex)
         {
         }
+    }
+
+    public void extraer_ventas_estadistica()
+    {
+        try
+        {
+            Conexion objeto = new Conexion();
+            string[] registro;
+            contador_ventas = 0;
+            objeto.abrir_conexion_mysql();
+            objeto.cadena_comando_mysql = "select ventas.fecha,ventas.clave_venta,sucursales.nombre ,inventario.producto,lista_productos_venta.codigo,lista_productos_venta.cantidad,lista_productos_venta.precio_total,lista_productos_venta.proveedor,sucursales_sistema.nombre from ventas inner join lista_productos_venta on lista_productos_venta.clave_venta = ventas.clave_venta inner join sucursales on ventas.id_sucursal = sucursales.id_sucursal inner join inventario on inventario.codigo_proveedor = lista_productos_venta.codigo inner join sucursales_sistema on ventas.id_sucursal_sistema = sucursales_sistema.id_sucursal_sistema where (Date_format(ventas.fecha,'%Y-%m-%d')  BETWEEN '2016-06-01'  and  '2016-12-31') order by ventas.fecha desc ";
+            objeto.aplicar_comando_mysql_extraccion();
+            while (objeto.leer_comando.Read())
+            {
+                registro = new string [9];
+                for (i = 0; i < 9; i++)
+                {
+                    registro[i] = objeto.leer_comando.GetString(i);
+                }
+                fecha_venta[contador_ventas] = Convert.ToDateTime(registro[0]);
+                clave_venta[contador_ventas] = registro[1];
+                clientes[contador_ventas] = registro[2];             
+                producto_lista_orden[contador_ventas] = registro[3];
+                codigo_proveedor_lista_venta[contador_ventas] = registro[4]; 
+                cantidad_lista_venta[contador_ventas] = Convert.ToInt32(registro[5]);
+                precio_lista_venta[contador_ventas] = Convert.ToDouble(registro[6]);
+                proveedor_lista_venta[contador_ventas] = registro[7];
+                sucursal[contador_ventas] = registro[8];
+                contador_ventas++;
+            }
+            objeto.cerrar_conexion_mysql_extraccion();
+        }
+        catch { }
     }
 
     public void extraer_requisisciones()
@@ -726,6 +781,48 @@ public partial class filtrado_ventas : System.Web.UI.Page
         }
         enchufe.enchufado = 0;
         return tabla_pedidos;   
+    }
+
+    public DataTable ventas_calcular()
+    {
+        DataTable tabla_calcular = new DataTable();
+        tabla_calcular.Columns.Add(new DataColumn("fecha_venta_calcula", typeof(DateTime)));
+        tabla_calcular.Columns.Add(new DataColumn("clave_venta_calcula", typeof(string)));
+        tabla_calcular.Columns.Add(new DataColumn("cliente_calcula", typeof(string)));
+        tabla_calcular.Columns.Add(new DataColumn("producto",typeof(string)));
+        tabla_calcular.Columns.Add(new DataColumn("codigo_proveedor", typeof(string)));
+        tabla_calcular.Columns.Add(new DataColumn("cantidad", typeof(Int32)));
+        tabla_calcular.Columns.Add(new DataColumn("precio", typeof(double)));
+        tabla_calcular.Columns.Add(new DataColumn("proveedor", typeof(string)));
+        tabla_calcular.Columns.Add(new DataColumn("sucursal", typeof(string)));
+        if (contador_ventas > 0)
+        {
+            j = 0;
+            do
+            {
+                DataRow fila = tabla_calcular.NewRow();
+                if (fecha_venta[j] != null)
+                {
+                    fila["fecha_venta_calcula"] = fecha_venta[j];
+                    fila["clave_venta_calcula"] = clave_venta[j];
+                    fila["cliente_calcula"] = clientes[j];
+                    fila["producto"] = producto_lista_orden[j];
+                    fila["codigo_proveedor"] = codigo_proveedor_lista_venta[j];
+                    fila["cantidad"] = cantidad_lista_venta[j];
+                    fila["precio"] = precio_lista_venta[j];
+                    fila["proveedor"] = proveedor_lista_venta[j];
+                    fila["sucursal"] = sucursal[j];
+                    tabla_calcular.Rows.Add(fila);
+                    j++;
+                }
+                else
+                {
+
+                }
+            }
+            while (j < contador_ventas);
+        }
+        return tabla_calcular;
     }
 
     public DataTable ventas()
@@ -1089,6 +1186,10 @@ public partial class filtrado_ventas : System.Web.UI.Page
             numero_registros_ventas();
             extraer_ventas();
             tabla_principal.DataBind();
+
+            generar_n_ventas_estadisticas();
+            extraer_ventas_estadistica();
+            ventas_calcula.DataBind();
             /*tabla_principal.UseAccessibleHeader = true;
             tabla_principal.HeaderRow.TableSection = TableRowSection.TableHeader;
             TableCellCollection cells = tabla_principal.HeaderRow.Cells;
@@ -1103,9 +1204,6 @@ public partial class filtrado_ventas : System.Web.UI.Page
             cells[14].Attributes.Add("data-priority", "9");
             cells[15].Attributes.Add("data-priority", "2");
             cells[1].Attributes.Add("data-priority", "1");*/
-            
-           
-
         }
         else 
         {

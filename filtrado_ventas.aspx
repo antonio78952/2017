@@ -84,6 +84,8 @@
           $('.desactivado').click(function () {
               $(this).toggleClass("mostrar");
           });
+
+          
       });
     </script>
     
@@ -101,18 +103,18 @@ $(function () {
 
 $(function () {
     var suma = 0;
-    $("tbody tr").click(function () {
+    $("#tabla_principal > tbody > tr").click(function () {
         if ($('#boton_calcular').hasClass("mostrar")) {
             $(this).toggleClass("selected");
             var currentRow = $(this).closest("tr");
             var productos = $(this).closest("tr").find("div >.tabla_venta_lista > tbody > .orales > td");
-           // var productos2 = find("[0].children[16].children["divVEN-10lv"].children["0"].children.tabla_principal_ctl02_tabla_ventas_lista.children["0"].children[1]")
+            // var productos2 = find("[0].children[16].children["divVEN-10lv"].children["0"].children.tabla_principal_ctl02_tabla_ventas_lista.children["0"].children[1]")
             var cantidad = currentRow.find("td:eq(3)").text();
             $.each($(productos).eq(1),
-         function (i , val) {
+         function (i, val) {
              var muestra = $(val).text();
 
-          
+
              //document.getElementById('panel_mamalon').innerHTML += '<br/><input type="text" id="caja' + i + '" value="' + val.text(); +'" "  /><br/>';
          });
             if ($(this).hasClass("selected")) {
@@ -132,55 +134,14 @@ $(function () {
     });
 });
 
-$(function () {
-    var $rows = $('#tabla_principal ');
-    $('#buscarfecha').change(function () {
-        var that = this;
-        $.each($('tr'),
-        function (i, val) {
-            if (val.className != "orales") {
-             
-                if ($(val).text().indexOf($(that).val()) == -1) {
-                    $('tr').eq(i).hide();
-                } else {
-                    $('tr').eq(i).show();
-                }
-                if (val.className == "cabecera_tabla") {
-                    $('tr').eq(i).show(); 
-                 }
-            }
-        });
-    });
-});
-
 
 </script>
-<script>
-    function buscador() {
-        // Declare variables 
-        var input, filter, table, tr, td, i;
-        input = document.getElementById("#buscarfecha");
-        filter = input.value.toUpperCase();
-        table = document.getElementById("#tabla_principal");
-        tr = table.getElementsByTagName("tr");
-        // Loop through all table rows, and hide those who don't match the search query
-        for (i = 0; i < tr.length; i++) {
-            td = tr[i].getElementsByTagName("td")[0];
-            if (td) {
-                if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
-                    tr[i].style.display = "";
-                } else {
-                    tr[i].style.display = "none";
-                }
-            }
-        }
-    }
-</script>
 
-<script type="text/javascript">
+
+<script type="text/javascript"> 
     function estadisticas() {
         // Variables
-        var entrada, entrada_fecha, tabla_fecha, filtro, tabla, tr, td, i, numero_ventas, productos_consume, promedio_consumo_mes, total, fecha_fila, fecha_busca;
+        var entrada, entrada_fecha, tabla_fecha, filtro, tabla, tr, td,td_fecha, i, numero_ventas, productos_consume, promedio_consumo_mes, total, fecha_fila, fecha_busca;
         var venta = 0;
         entrada = document.getElementById("calcular");
         entrada_fecha = document.getElementById("buscarfecha");
@@ -188,29 +149,53 @@ $(function () {
         fecha = entrada_fecha.value.toUpperCase();
         tabla = document.getElementById('tabla_principal');
         tr = tabla.getElementsByTagName('tr');
-        // ciclo mamalon [1].children[4].cellIndex [1].cells[4] [1].cells[4]
         for (i = 0; i < tr.length; i++) {
             td = tr[i].getElementsByTagName("td")[0];
-            //tabla_fecha = (tr[i].getElementsByTagName("td"));
-
-            if (td) {
-                if (td.innerHTML.toUpperCase().indexOf(filtro) > -1) {
+            td_fecha = tr[i].getElementsByTagName("td")[4];
+            if (td || td_fecha) {
+                if (td.innerHTML.toUpperCase().indexOf(filtro) > -1 && td_fecha.innerHTML.toUpperCase().indexOf(fecha) > -1) {
                     tr[i].style.display = "";
-                    //total = tr[i].getElementsByTagName("td")[20];
-                    //venta += parseInt(total.textContent, 10);
                 } else if (tr[i].className != "orales") { //devido alos gridview anidados es nesesario excluirlos
                     tr[i].style.display = "none";
                 }
+
             }
         }
-        //document.getElementById('panel_mamalon').innerHTML += '<br/><input type="text" id="caja' + i + '" value="' + venta + '" "  /><br/>';
-        //$('#id = "caja' + i + '"').dialog({ width: 'auto' });
     }
+
+    function estadisticas_productos() {
+
+        // Variables
+        var entrada, entrada_fecha, tabla_fecha, filtro, tabla, tr, td_cliente,td_producto,td_codigo , td_fecha, i, numero_ventas, productos_consume, promedio_consumo_mes, total, fecha_fila, fecha_busca;
+        var venta = 0;
+        entrada = document.getElementById("calcular");
+        entrada_fecha = document.getElementById("buscarfecha");
+        filtro = entrada.value.toUpperCase();
+        fecha = entrada_fecha.value;
+        tabla = document.getElementById('ventas_calcula');
+        tr = tabla.getElementsByTagName('tr');
+        for (i = 0; i < tr.length; i++) {
+            td_cliente = tr[i].getElementsByTagName("td")[2];
+            td_fecha = tr[i].getElementsByTagName("td")[0];
+            if (td_cliente || td_fecha) {
+                if (td_cliente.innerHTML.toUpperCase().indexOf(filtro) > -1 && td_fecha.innerHTML.toUpperCase().indexOf(fecha) > -1) {
+                    tr[i].style.display = "";   
+                } else  { 
+                    tr[i].style.display = "none";
+                }
+
+            }
+        } // fin cliclo
+        $(function () {
+            $("#panel_ventas_mamalon").dialog({ width: 'auto', height: 400, title: "Tabla Ventas Desglosadas" });
+        });  
+    }
+
 </script>  
 <script type="text/javascript" language="javascript">
     $(function () {
         var tableOffset = $("#tabla_principal").offset().top;
-        var $header = $("#tabla_principal > tbody > tr >th").clone();
+        var $header = $("#tabla_principal > tbody > tr > th").clone();
         var $fixedHeader = $("#header-fixed").append($header);
         $(window).bind("scroll", function () {
             var offset = $(this).scrollTop();
@@ -221,7 +206,8 @@ $(function () {
                 $fixedHeader.hide();
             }
         });
-    });
+        
+    }); //fin funcion
 
 
     function productos() {
@@ -240,6 +226,34 @@ $(function () {
             }
         });
     }
+
+    $(function () {
+        var suma = 0;
+        $("#panel_mamalon_filtro").accordion({ collapsible: true });
+        $("#div_mamalon_filtro").accordion({ collapsible: true });
+
+        $("#ventas_calcula > tbody > tr").click(function () {
+            if ($('#boton_calcular').hasClass("mostrar")) {
+                $(this).toggleClass("selected");
+                var currentRow = $(this).closest("tr");
+                var cantidad = currentRow.find("td:eq(6)").text();
+
+                if ($(this).hasClass("selected")) {
+                    if (!isNaN(cantidad) && cantidad.length !== 0) {
+                        suma += parseInt(cantidad, 10);
+                        //suma += parseFloat(cantidad);
+                        //alert('la suma de las columnas va en ' + suma + '');
+                    }
+                }
+                else if (!isNaN(cantidad) && cantidad.length !== 0) {
+                    suma -= parseInt(cantidad, 10);
+                    //suma -= parseFloat(cantidad);
+                    //alert('le restamos ala cuenta ' + cantidad + ' y nos quedan' + suma + ' ');  
+                } $("#resultados_producto").text('' + suma + '');
+                $("#panel_mamalon_productos").dialog();
+            }
+        });
+    });
 </script>    
 
 
@@ -275,14 +289,29 @@ $(function () {
           <div class="paneles_graficas">         
             <div class="cabecera_informacion"><asp:Label runat="server" CssClass="texto_cabecera">Buscar</asp:Label></div>
             <div class="controles_busqueda">
-                <asp:TextBox ID="calcular" runat="server" CssClass="caja"  Enabled="true" placeholder="Buscar" ></asp:TextBox>
-                <a href="JavaScript:estadisticas();"><input id="buscar" type="button" value="Buscar" class="esconder"/></a>
-                <a href="JavaScript:productos();"><input id="hola" type="button" value="Buscar Productos" /></a>
-                <asp:TextBox ID="buscarfecha" runat="server" CssClass="caja" placeholder="Buscar Fecha" ></asp:TextBox>
-                <div class="cabecera_informacion"><asp:Label ID="Label1" runat="server" CssClass="texto_cabecera">Controles</asp:Label></div>
-                <input id="boton_calcular" type="button" value="Calcular" class="desactivado"/>
+            <!----- Acordeon Filtro ----->
+                <div id="panel_mamalon_filtro" >
+                    <h3 class="texto_cabecera">Filtro Busqueda</h3>
+                    <div> 
+                        <asp:TextBox ID="calcular" runat="server" CssClass="caja"  Enabled="true" placeholder="Buscar" ></asp:TextBox>
+                        <asp:TextBox ID="buscarfecha" runat="server" CssClass="caja" placeholder="Buscar Fecha" ></asp:TextBox>
+                        <asp:TextBox ID="buscar_producto" runat="server" CssClass="caja" placeholder="Buscar Producto" ></asp:TextBox>
+                        <asp:TextBox ID="buscar_codigo" runat="server" CssClass="caja" placeholder="Buscar Codigo" ></asp:TextBox>
+                        <a href="JavaScript:estadisticas();"><input id="buscar" type="button" value="Buscar" class="esconder"/></a>
+                        <a href="JavaScript:estadisticas_productos();"><input id="Button1" type="button" value="Buscar En Desglosados" class="esconder"/></a>
+                    </div>
+                    <!----- Acordeon Controles ----->
+                    <h3 class="texto_cabecera">Filtro Controles</h3>
+                    <div>  
+                        <input id="boton_calcular" type="button" value="Calcular" class="desactivado"/>
+                    </div>  
+                </div>
+               <!----- PANELES DIALOG JQUERY RESULTADOS ----->
                 <asp:Panel ID="panel_mamalon" title="Suma De Ventas Totales"  runat="server" style="display: none">
                     <asp:Label  ID ="resultados" Text="" runat="server" class="texto_cabecera resultado" />
+                </asp:Panel>
+                <asp:Panel ID="panel_mamalon_productos" title="Suma De Ventas Productos"  runat="server" style="display: none">
+                    <asp:Label  ID ="resultados_producto" Text="" runat="server" class="texto_cabecera resultado" />
                 </asp:Panel>
             </div>
           </div>
@@ -291,8 +320,9 @@ $(function () {
         <div id="main_derecho">
         <div class="paneles_graficas"> 
         <div class="cabecera_informacion"><asp:Label ID="Label2" runat="server" CssClass="texto_cabecera">Columnas</asp:Label></div>        
-        <div class="controles_busqueda">
-            <div class="paneles_graficas">
+        <div class="controles_busqueda" id="div_mamalon_filtro">
+        <h3 class="texto_cabecera">Filtrado Columnas</h3>
+            <div >
                   <input id="5" type="button" value="Fecha Venta" class="esconder"/>
                   <input id="1" type="button" value="Cliente" class="esconder"/>
                   <input id="8" type="button" value="Clave Cotizacion" class="esconder"/>
@@ -320,6 +350,7 @@ $(function () {
         </div>
         
    <!----- Main Centro ----->
+       
         <div id="main_centro">
             <div class="paneles_graficas display">
                 <table id="header-fixed"></table>
@@ -552,7 +583,34 @@ $(function () {
                     </ItemTemplate>
                     </asp:TemplateField>      
                 </Columns>  
-                </asp:GridView>    
+                </asp:GridView>
+                
+                <div id="panel_ventas_mamalon" style="display: none" >
+                    <asp:GridView ID="ventas_calcula" width="600px" runat="server" DataSource='<%# ventas_calcular() %>' AutoGenerateColumns="false" >
+                        <HeaderStyle CssClass="cabecera_tabla" />
+                        <RowStyle CssClass="desglosada"  />
+                        <Columns>
+                        <asp:BoundField HeaderText="Fecha Venta" DataField="fecha_venta_calcula" DataFormatString="{0:dd/MM/yyyy hh:mm:ss}" >
+                        </asp:BoundField>
+                        <asp:BoundField HeaderText="Clave Venta" DataField="clave_venta_calcula" >
+                        </asp:BoundField>
+                        <asp:BoundField HeaderText="Cliente" DataField="cliente_calcula" >
+                        </asp:BoundField>
+                        <asp:BoundField HeaderText="Producto" DataField="producto" >
+                        </asp:BoundField>
+                        <asp:BoundField HeaderText="Codigo" DataField="codigo_proveedor" >
+                        </asp:BoundField>
+                        <asp:BoundField HeaderText="Cantidad" DataField="cantidad" >
+                        </asp:BoundField>
+                        <asp:BoundField HeaderText="Precio Total" DataField="precio" >
+                        </asp:BoundField>
+                        <asp:BoundField HeaderText="Proveedor" DataField="proveedor" >
+                        </asp:BoundField>
+                        <asp:BoundField HeaderText="Sucursal" DataField="sucursal" >
+                        </asp:BoundField>
+                        </Columns>
+                    </asp:GridView>
+                </div>
             </div>
         </div>
     </div> 
